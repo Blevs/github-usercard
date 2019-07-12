@@ -3,6 +3,35 @@
            https://api.github.com/users/<your name>
 */
 
+const cards = document.querySelector('.cards');
+
+axios.get('https://api.github.com/users/blevs')
+  .then(res => {
+    console.log(res.data);
+    const card = createCard(res.data);
+    cards.append(card);
+  })
+  .catch(error => console.log('oops'));
+
+axios.get('https://api.github.com/users/blevs/followers')
+  .then(res => res.data.slice(0, 3))
+  .then(followers => {
+    followers.forEach(follower => {
+      axios.get(`https://api.github.com/users/${follower.login}`)
+        .then(res => {
+          const card = createCard(res.data);
+          cards.append(card);
+        });
+    });
+  });
+
+
+// axios.get('https://github.com/users/blevs/contributions')
+//   .then(res => {
+//     return console.log(res.data);
+//   });
+
+
 /* Step 2: Inspect and study the data coming back, this is YOUR 
    github info! You will need to understand the structure of this 
    data in order to use it to build your component function 
@@ -26,25 +55,96 @@
 
 const followersArray = [];
 
+const instructors = [
+  "tetondan",
+  "dustinmyers",
+  "justsml",
+  "luishrd",
+  "bigknell",
+];
+
+instructors.forEach(instructor => {
+  axios.get(`https://api.github.com/users/${instructor}`)
+    .then(res => {
+      const card = createCard(res.data);
+      cards.append(card);
+    });
+});
+
 /* Step 3: Create a function that accepts a single object as its only argument,
           Using DOM methods and properties, create a component that will return the following DOM element:
 
-<div class="card">
-  <img src={image url of user} />
-  <div class="card-info">
-    <h3 class="name">{users name}</h3>
-    <p class="username">{users user name}</p>
-    <p>Location: {users location}</p>
-    <p>Profile:  
-      <a href={address to users github page}>{address to users github page}</a>
-    </p>
-    <p>Followers: {users followers count}</p>
-    <p>Following: {users following count}</p>
-    <p>Bio: {users bio}</p>
-  </div>
-</div>
 
 */
+
+function createCard(user) {
+  const card = document.createElement('div');
+  card.classList.add('card');
+
+  const avatar = document.createElement('img');
+  avatar.src = user.avatar_url;
+
+  const cardInfo = document.createElement('div');
+  cardInfo.classList.add('card-info');
+
+  const name = document.createElement('h3');
+  name.classList.add('name');
+  name.textContent = user.name;
+
+  const username = document.createElement('p');
+  username.classList.add('username');
+  username.textContent = user.login;
+
+  const location = document.createElement('p');
+  location.textContent = `Location: ${user.location}`;
+
+  const profile = document.createElement('p');
+  profile.textContent = 'Profile: ';
+
+  const link = document.createElement('a');
+  link.href = user.html_url;
+  link.textContent = user.html_url;
+
+  const followers = document.createElement('p');
+  followers.textContent = `Followers: ${user.followers}`;
+
+  const following = document.createElement('p');
+  following.textContent = `Following: ${user.following}`;
+
+  const bio = document.createElement('p');
+  bio.textContent = `Bio: ${user.bio || "none"}`;
+  // bio.textContent = user.bio || "none";
+
+  card.append(avatar);
+  card.append(cardInfo);
+  cardInfo.append(
+    name,
+    username,
+    location,
+    profile,
+    followers,
+    following,
+    bio
+  );
+  profile.append(link);
+
+  return card;
+}
+
+// <div class="card">
+//   <img src={image url of user} />
+//   <div class="card-info">
+//     <h3 class="name">{users name}</h3>
+//     <p class="username">{users user name}</p>
+//     <p>Location: {users location}</p>
+//     <p>Profile:  
+//       <a href={address to users github page}>{address to users github page}</a>
+//     </p>
+//     <p>Followers: {users followers count}</p>
+//     <p>Following: {users following count}</p>
+//     <p>Bio: {users bio}</p>
+//   </div>
+// </div>
 
 /* List of LS Instructors Github username's: 
   tetondan
